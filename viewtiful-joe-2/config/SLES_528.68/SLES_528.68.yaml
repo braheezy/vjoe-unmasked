@@ -1,0 +1,46 @@
+name: Viewtiful Joe 2
+sha1: ef9abbcafc907b32565707c9d87cd1eb43d2e56d
+options:
+  basename: SLES_528.68
+  base_path: .
+  target_path: rom/SLES_528.68
+  elf_path: SLES_528.68
+  find_file_boundaries: False
+  asm_path: asm
+  rodata_string_guesser_level: 0
+  symbol_addrs_path: symbol_addrs.txt
+  gp_value: 0x466b70
+  ld_script_path: linkers/SLES_528.68.ld
+  undefined_funcs_auto_path: linkers/viewtiful_joe_undefined_funcs_auto.main.txt
+  undefined_syms_auto_path: linkers/viewtiful_joe_undefined_syms_auto.main.txt
+  asm_nonmatching_label_macro: ""
+  migrate_rodata_to_functions: True
+  pair_rodata_to_text: True
+  section_order: [".text", ".vutext", ".data", ".rodata", ".sdata", ".sbss", ".bss"]
+  symbol_name_format: $VRAM
+segments:
+  - [0x0]
+  - name: engine
+    type: code
+    start: 0x1000
+    vram: 0x00100000
+    bss_size: 0x1afd82c
+    subsegments:
+      - [0x001000, c, early_state_rest]
+      - [0x007810, asm, text_00106810]
+      - [0x040f98, asm, text_0013FF98]
+      - [0x081030, asm, text_00180030]
+      - [0x0c0fe0, asm, text_001BFFE0]
+      - [0x100fa8, asm, text_001FFFA8]
+      - [0x140e88, asm, text_0023FE88]
+      - [0x180e80, asm, text_0027FE80]
+      - [0x1c07a0, asm, text_002BF7A0]
+      - [0x200f48, asm, text_002FFF48]
+      - [0x282178, asm, entry]
+      - [0x282200, asm, text_00382200]
+      - [0x2c3e80, data, data]
+      - [0x349200, rodata, rodata]
+      - [0x35fb80, sdata, sdata]
+      - { vram: 0x0045f700, type: sbss, name: sbss }
+      - { vram: 0x0045f980, type: bss, name: bss }
+  - [0x3606c8]

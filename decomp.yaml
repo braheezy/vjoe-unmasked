@@ -1,0 +1,16 @@
+# Metadata for decomp.dev tooling
+name: Viewtiful Joe 2
+repo: https://github.com/braheezy/vjoe-unmasked
+platform: ps2
+versions:
+  - name: pal
+    fullname: Viewtiful Joe 2
+    sha1: ef9abbcafc907b32565707c9d87cd1eb43d2e56d
+    paths:
+      target: "rom/SLES_528.68/SLES_528.68"
+      elf: "build/SLES_528.68/SLES_528.68.elf"
+      build_dir: "build/SLES_528.68"
+      map: "build/SLES_528.68.xMAP"
+      compiled_target: "build/SLES_528.68/SLES_528.68.rom"
+    asm: "viewtiful-joe-2/config/SLES_528.68/asm"
+    nonmatchings: "viewtiful-joe-2/config/SLES_528.68/asm/nonmatchings"

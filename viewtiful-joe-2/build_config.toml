@@ -1,0 +1,16 @@
+project = "viewtiful-joe-2"
+serial = "SLES_528.68"
+
+default_opt_level = "-O2"
+special_opt_level = "-O0"
+
+ee_gcc_path = "tools/ee-gcc2.95.3-136/bin/ee-gcc.exe"
+ee_gcc_tar = "ee-gcc2.95.3-136.tar.gz"
+
+ee_gcc_flags = [
+  "-G0",
+  "-Iviewtiful-joe-2/src",
+  "-Iviewtiful-joe-2/include",
+  "-Wa,-Iviewtiful-joe-2/include",
+  "-Wa,-Iviewtiful-joe-2/config/SLES_528.68",
+]

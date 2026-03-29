@@ -1,0 +1,11 @@
+[project]
+name = "vjoe-unmasked"
+version = "0.1.0"
+description = "viewtiful joes ps2 decomp"
+requires-python = ">=3.12"
+dependencies = [
+  "splat64[mips]>=0.37.1,<1.0.0",
+]
+
+[tool.uv]
+package = false
