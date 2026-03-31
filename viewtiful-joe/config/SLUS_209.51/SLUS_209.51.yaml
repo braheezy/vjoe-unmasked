@@ -1,0 +1,28 @@
+# Initial scaffold for Viewtiful Joe (USA).
+# This file is only a starting point. The section layout, gp value, and segment
+# map have not been validated yet for SLUS_209.51.
+
+name: Viewtiful Joe
+sha1: a80fb2efdf47ed4120911ca2815b390ce201b5ad
+options:
+  basename: SLUS_209.51
+  base_path: .
+  target_path: rom/SLUS_209.51
+  elf_path: SLUS_209.51
+  find_file_boundaries: False
+  asm_path: asm
+  rodata_string_guesser_level: 0
+  symbol_addrs_path: symbol_addrs.txt
+  gp_value: 0x0 # TODO: determine real gp value from the executable
+  ld_script_path: linkers/SLUS_209.51.ld
+  undefined_funcs_auto_path: linkers/viewtiful_joe_undefined_funcs_auto.main.txt
+  undefined_syms_auto_path: linkers/viewtiful_joe_undefined_syms_auto.main.txt
+  asm_nonmatching_label_macro: ""
+  migrate_rodata_to_functions: True
+  pair_rodata_to_text: True
+  section_order: [".text", ".vutext", ".data", ".rodata", ".sdata", ".sbss", ".bss"]
+  symbol_name_format: $VRAM
+segments:
+  - [0x0]
+  # TODO: replace this placeholder with the real executable layout.
+  - [0x32CEE4]

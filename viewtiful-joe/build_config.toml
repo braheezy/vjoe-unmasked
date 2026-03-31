@@ -1,0 +1,16 @@
+project = "viewtiful-joe"
+serial = "SLUS_209.51"
+
+default_opt_level = "-O2"
+special_opt_level = "-O0"
+
+ee_gcc_path = "tools/ee-gcc2.95.3-136/bin/ee-gcc.exe"
+ee_gcc_tar = "ee-gcc2.95.3-136.tar.gz"
+
+ee_gcc_flags = [
+  "-G0",
+  "-Iviewtiful-joe/src",
+  "-Iviewtiful-joe/include",
+  "-Wa,-Iviewtiful-joe/include",
+  "-Wa,-Iviewtiful-joe/config/SLUS_209.51",
+]
