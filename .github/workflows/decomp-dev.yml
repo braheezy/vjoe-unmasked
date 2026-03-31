@@ -1,0 +1,39 @@
+name: decomp.dev report
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  report-sles-528-68:
+    name: SLES_528.68 report
+    runs-on: macos-14
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build matching binary
+        run: |
+          ninja setup
+          ninja
+
+      - name: Generate objdiff report
+        run: ninja report
+
+      - name: Upload decomp.dev progress report
+        uses: actions/upload-artifact@v4
+        with:
+          name: SLES_528.68_report
+          path: build/SLES_528.68/report.json
+          if-no-files-found: error
