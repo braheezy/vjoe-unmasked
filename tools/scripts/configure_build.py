@@ -356,8 +356,13 @@ def postprocess_split_sources(config: ProjectConfig, config_dir: Path, build_dir
 def write_sles_gnu_ld(config_dir: Path, build_dir: Path) -> None:
     linkers_dir = config_dir / "linkers"
     ld_path = linkers_dir / "SLES_528.68.ld"
+    root_linkers_dir = ROOT / "linkers"
     undefined_funcs_path = linkers_dir / "viewtiful_joe_undefined_funcs_auto.main.txt"
     undefined_syms_path = linkers_dir / "viewtiful_joe_undefined_syms_auto.main.txt"
+    if not undefined_funcs_path.exists():
+        undefined_funcs_path = root_linkers_dir / "viewtiful_joe_undefined_funcs_auto.main.txt"
+    if not undefined_syms_path.exists():
+        undefined_syms_path = root_linkers_dir / "viewtiful_joe_undefined_syms_auto.main.txt"
     undefined_funcs = undefined_funcs_path.read_text().strip() if undefined_funcs_path.exists() else ""
     undefined_syms = undefined_syms_path.read_text().strip() if undefined_syms_path.exists() else ""
     asm_root = rel(build_dir / "asm")
