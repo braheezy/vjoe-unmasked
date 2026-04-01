@@ -1091,14 +1091,13 @@ def main() -> int:
     build_dir = ROOT / "build" / config.serial
     rom_dir = ROOT / "rom" / config.serial
     source_executable = rom_dir / config.serial
-
+    ensure_source_executable(rom_dir, source_executable, config.serial)
     if not source_executable.exists():
         raise SystemExit(f"{rel(source_executable)} is missing, please provide this file.")
 
     mode = sys.argv[1] if len(sys.argv) > 1 else "configure"
 
     if mode == "splat-generate":
-        ensure_source_executable(rom_dir, source_executable, config.serial)
         args = sys.argv[2:]
         verbose = False
         no_objdiff = False
@@ -1167,14 +1166,12 @@ def main() -> int:
         return 0
 
     if mode == "split":
-        ensure_source_executable(rom_dir, source_executable, config.serial)
         uv_sync()
         split_outputs(config, config_dir, build_dir, include_dir)
         return 0
     if mode != "configure":
         raise SystemExit(f"unknown mode: {mode}")
 
-    ensure_source_executable(rom_dir, source_executable, config.serial)
     c_sources = scan_sources(project_dir / "src", ".c")
     c_units = [analyze_c_source(path, project_dir, build_dir) for path in c_sources]
     c_stems = {path.stem for path in c_sources}
