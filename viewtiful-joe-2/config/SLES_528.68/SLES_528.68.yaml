@@ -2,8 +2,8 @@ name: Viewtiful Joe 2
 sha1: ef9abbcafc907b32565707c9d87cd1eb43d2e56d
 options:
   basename: SLES_528.68
-  base_path: .
-  target_path: rom/SLES_528.68
+  base_path: ../../..
+  target_path: rom/SLES_528.68/SLES_528.68
   elf_path: SLES_528.68
   find_file_boundaries: False
   asm_path: asm

@@ -12,7 +12,7 @@ rule uv_sync
   restat = 1
 
 rule bootstrap_toolchain
-  command = ROOT_DIR=. ROM_DIR=rom/SLES_528.68 ROM_SYMLINK=viewtiful-joe-2/config/SLES_528.68/rom SOURCE_EXECUTABLE=rom/SLES_528.68/SLES_528.68 WIBO_PATH=tools/wibo-macos WIBO_URL=https://github.com/decompals/wibo/releases/download/1.0.1/wibo-macos EE_GCC_PATH=tools/ee-gcc2.95.3-136/bin/ee-gcc.exe EE_GCC_URL=https://github.com/decompme/compilers/releases/download/compilers/ee-gcc2.95.3-136.tar.gz AS_PATH=tools/binutils-mips-ps2-decompals/mips-ps2-decompals-as OBJCOPY_PATH=tools/binutils-mips-ps2-decompals/mips-ps2-decompals-objcopy BINUTILS_URL=https://github.com/dreamingmoths/binutils-mips-ps2-decompals/releases/download/v0.8-aarch64/binutils-mips-ps2-decompals-macos-arm64.tar.gz OBJDIFF_PATH=tools/objdiff-cli-macos-arm64 OBJDIFF_URL=https://github.com/encounter/objdiff/releases/download/v3.6.0/objdiff-cli-macos-arm64 bash tools/scripts/bootstrap_toolchain.sh $out
+  command = ROOT_DIR=. ROM_DIR=rom/SLES_528.68 SOURCE_EXECUTABLE=rom/SLES_528.68/SLES_528.68 WIBO_PATH=tools/wibo-macos WIBO_URL=https://github.com/decompals/wibo/releases/download/1.0.1/wibo-macos EE_GCC_PATH=tools/ee-gcc2.95.3-136/bin/ee-gcc.exe EE_GCC_URL=https://github.com/decompme/compilers/releases/download/compilers/ee-gcc2.95.3-136.tar.gz AS_PATH=tools/binutils-mips-ps2-decompals/mips-ps2-decompals-as OBJCOPY_PATH=tools/binutils-mips-ps2-decompals/mips-ps2-decompals-objcopy BINUTILS_URL=https://github.com/dreamingmoths/binutils-mips-ps2-decompals/releases/download/v0.8-aarch64/binutils-mips-ps2-decompals-macos-arm64.tar.gz OBJDIFF_PATH=tools/objdiff-cli-macos-arm64 OBJDIFF_URL=https://github.com/encounter/objdiff/releases/download/v3.6.0/objdiff-cli-macos-arm64 bash tools/scripts/bootstrap_toolchain.sh $out
   description = SETUP toolchain
   restat = 1
 
@@ -64,10 +64,14 @@ rule diff
   description = DIFF
 
 rule clean_tree
-  command = rm -rf build/SLES_528.68 viewtiful-joe-2/config/SLES_528.68/asm viewtiful-joe-2/config/SLES_528.68/assets viewtiful-joe-2/config/SLES_528.68/linkers viewtiful-joe-2/config/SLES_528.68/rom && mkdir -p build/stamps && touch $out
+  command = rm -rf build/SLES_528.68 viewtiful-joe-2/config/SLES_528.68/asm viewtiful-joe-2/config/SLES_528.68/assets viewtiful-joe-2/config/SLES_528.68/linkers && mkdir -p build/stamps && touch $out
   description = CLEAN
 
-build build.ninja: configure decomp.yaml pyproject.toml rom/SLES_528.68 tools/scripts/bootstrap_toolchain.sh tools/scripts/configure_build.py tools/scripts/diff.sh uv.lock viewtiful-joe-2/build_config.toml viewtiful-joe-2/config/SLES_528.68 viewtiful-joe-2/config/SLES_528.68/README.md viewtiful-joe-2/config/SLES_528.68/SLES_528.68.yaml viewtiful-joe-2/config/SLES_528.68/asm viewtiful-joe-2/config/SLES_528.68/categories.json viewtiful-joe-2/config/SLES_528.68/checksum.sha viewtiful-joe-2/config/SLES_528.68/linkers viewtiful-joe-2/config/SLES_528.68/rom viewtiful-joe-2/config/SLES_528.68/splat.config.yaml viewtiful-joe-2/config/SLES_528.68/symbol_addrs.txt viewtiful-joe-2/include/include_asm.h viewtiful-joe-2/include/labels.inc viewtiful-joe-2/include/macro.inc viewtiful-joe-2/src/common.h viewtiful-joe-2/src/early_state_rest.c
+rule clean_toolchain
+  command = rm -rf tools/binutils-mips-ps2-decompals tools/wibo-* tools/objdiff-cli-* build/stamps/toolchain.stamp && mkdir -p build/stamps && touch $out
+  description = CLEAN toolchain
+
+build build.ninja: configure decomp.yaml pyproject.toml rom/SLES_528.68 tools/scripts/bootstrap_toolchain.sh tools/scripts/configure_build.py tools/scripts/diff.sh uv.lock viewtiful-joe-2/build_config.toml viewtiful-joe-2/config/SLES_528.68 viewtiful-joe-2/config/SLES_528.68/README.md viewtiful-joe-2/config/SLES_528.68/SLES_528.68.yaml viewtiful-joe-2/config/SLES_528.68/asm viewtiful-joe-2/config/SLES_528.68/categories.json viewtiful-joe-2/config/SLES_528.68/checksum.sha viewtiful-joe-2/config/SLES_528.68/linkers viewtiful-joe-2/config/SLES_528.68/splat.config.yaml viewtiful-joe-2/config/SLES_528.68/symbol_addrs.txt viewtiful-joe-2/include/include_asm.h viewtiful-joe-2/include/labels.inc viewtiful-joe-2/include/macro.inc viewtiful-joe-2/src/common.h viewtiful-joe-2/src/early_state_rest.c
 
 build build/stamps/python.stamp: uv_sync pyproject.toml uv.lock
 
@@ -926,6 +930,8 @@ build build/stamps/diff.stamp: diff build/SLES_528.68/SLES_528.68 viewtiful-joe-
 
 build build/stamps/clean.stamp: clean_tree build/stamps/force
 
+build build/stamps/clean-toolchain.stamp: clean_toolchain build/stamps/force
+
 build configure: phony build.ninja
 
 build split: phony build/stamps/split.stamp
@@ -937,6 +943,8 @@ build report: phony build/SLES_528.68/report.json
 build diff: phony build/stamps/diff.stamp
 
 build clean: phony build/stamps/clean.stamp
+
+build clean-toolchain: phony build/stamps/clean-toolchain.stamp
 
 build all: phony build/stamps/diff.stamp
 

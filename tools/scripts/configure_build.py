@@ -196,12 +196,14 @@ def uv_sync() -> None:
     run(["uv", "sync", "--frozen"], env=env)
 
 
-def ensure_rom_symlink(config_dir: Path, rom_dir: Path) -> None:
-    rom_symlink = config_dir / "rom"
-    rom_symlink.parent.mkdir(parents=True, exist_ok=True)
-    if rom_symlink.is_symlink() or rom_symlink.exists():
-        rom_symlink.unlink()
-    rom_symlink.symlink_to(rom_dir.resolve())
+def ensure_source_executable(rom_dir: Path, source_executable: Path, serial: str) -> None:
+    rom_dir.mkdir(parents=True, exist_ok=True)
+    if source_executable.exists():
+        return
+
+    orig_source = Path("/orig") / serial
+    if orig_source.exists():
+        source_executable.write_bytes(orig_source.read_bytes())
 
 
 def yaml_files(config_dir: Path) -> list[Path]:
@@ -705,6 +707,8 @@ def generator_inputs(config: ProjectConfig, config_dir: Path, project_dir: Path)
     for path in scan_sources(project_dir / "include", ".inc"):
         inputs.add(rel(path))
     for path in config_dir.iterdir():
+        if path.name == "rom":
+            continue
         inputs.add(rel(path))
     return sorted(inputs)
 
@@ -728,7 +732,6 @@ def write_build_ninja(
     linkers_dir = config_dir / "linkers"
     rom_dir = ROOT / "rom" / config.serial
     source_executable = rom_dir / config.serial
-    rom_symlink = config_dir / "rom"
     linker_script = linkers_dir / f"{config.serial}.ld"
     checksum_file = config_dir / "checksum.sha"
     categories_path = config_dir / "categories.json"
@@ -779,7 +782,6 @@ def write_build_ninja(
     bootstrap_env = {
         "ROOT_DIR": rel(ROOT),
         "ROM_DIR": rel(rom_dir),
-        "ROM_SYMLINK": rel(rom_symlink),
         "SOURCE_EXECUTABLE": rel(source_executable),
         "WIBO_PATH": rel(wibo_path),
         "WIBO_URL": f"{WIBO_HOST}/{wibo_binary}",
@@ -885,9 +887,17 @@ def write_build_ninja(
         "clean_tree",
         command=(
             f"rm -rf {q(rel(build_dir))} {q(rel(config_dir / 'asm'))} {q(rel(config_dir / 'assets'))} "
-            f"{q(rel(config_dir / 'linkers'))} {q(rel(config_dir / 'rom'))} && mkdir -p {q(rel(build_stamp_dir))} && touch $out"
+            f"{q(rel(config_dir / 'linkers'))} && mkdir -p {q(rel(build_stamp_dir))} && touch $out"
         ),
         description="CLEAN",
+    )
+    writer.rule(
+        "clean_toolchain",
+        command=(
+            f"rm -rf {q(rel(binutils_dir))} tools/wibo-* tools/objdiff-cli-* {q(rel(toolchain_stamp))} "
+            f"&& mkdir -p {q(rel(build_stamp_dir))} && touch $out"
+        ),
+        description="CLEAN toolchain",
     )
 
     writer.build("build.ninja", "configure", inputs=generator_inputs(config, config_dir, project_dir))
@@ -1054,6 +1064,11 @@ def write_build_ninja(
         "clean_tree",
         inputs=[rel(force_target)],
     )
+    writer.build(
+        rel(build_stamp_dir / "clean-toolchain.stamp"),
+        "clean_toolchain",
+        inputs=[rel(force_target)],
+    )
 
     writer.build("configure", "phony", inputs=["build.ninja"])
     writer.build("split", "phony", inputs=[rel(split_stamp)])
@@ -1061,6 +1076,7 @@ def write_build_ninja(
     writer.build("report", "phony", inputs=[rel(report_path)])
     writer.build("diff", "phony", inputs=[rel(build_stamp_dir / "diff.stamp")])
     writer.build("clean", "phony", inputs=[rel(build_stamp_dir / "clean.stamp")])
+    writer.build("clean-toolchain", "phony", inputs=[rel(build_stamp_dir / "clean-toolchain.stamp")])
     writer.build("all", "phony", inputs=[rel(build_stamp_dir / "diff.stamp")])
     writer.default(["all"])
 
@@ -1082,6 +1098,7 @@ def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "configure"
 
     if mode == "splat-generate":
+        ensure_source_executable(rom_dir, source_executable, config.serial)
         args = sys.argv[2:]
         verbose = False
         no_objdiff = False
@@ -1150,13 +1167,14 @@ def main() -> int:
         return 0
 
     if mode == "split":
+        ensure_source_executable(rom_dir, source_executable, config.serial)
         uv_sync()
-        ensure_rom_symlink(config_dir, rom_dir)
         split_outputs(config, config_dir, build_dir, include_dir)
         return 0
     if mode != "configure":
         raise SystemExit(f"unknown mode: {mode}")
 
+    ensure_source_executable(rom_dir, source_executable, config.serial)
     c_sources = scan_sources(project_dir / "src", ".c")
     c_units = [analyze_c_source(path, project_dir, build_dir) for path in c_sources]
     c_stems = {path.stem for path in c_sources}

@@ -38,3 +38,6 @@ ninja
   Reruns only the final ROM verification step.
 - `ninja clean`
   Removes generated build and split outputs.
+- `ninja clean-toolchain`
+  Deletes downloaded platform-specific tools and the toolchain stamp so you can
+  switch cleanly between host and container platforms.

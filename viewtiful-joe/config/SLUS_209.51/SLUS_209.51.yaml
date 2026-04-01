@@ -6,8 +6,8 @@ name: Viewtiful Joe
 sha1: a80fb2efdf47ed4120911ca2815b390ce201b5ad
 options:
   basename: SLUS_209.51
-  base_path: .
-  target_path: rom/SLUS_209.51
+  base_path: ../../..
+  target_path: rom/SLUS_209.51/SLUS_209.51
   elf_path: SLUS_209.51
   find_file_boundaries: False
   asm_path: asm

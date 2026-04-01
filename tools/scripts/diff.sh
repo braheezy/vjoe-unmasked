@@ -5,13 +5,14 @@ SERIAL="$1"
 CONFIG="$2"
 BUILD="$3"
 OBJCOPY="$4"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 if [[ -z "$SERIAL" ]]; then
     echo "usage: $0 <SERIAL> (e.g. SLUS_206.22)" >&2
     exit 1
 fi
 
-ROM=$CONFIG/rom
+ROM="$ROOT_DIR/rom/$SERIAL"
 CHECKSUM_FILE="$CONFIG/checksum.sha"
 
 BUILD_BIN="$BUILD/$SERIAL"

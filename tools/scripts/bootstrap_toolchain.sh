@@ -67,9 +67,6 @@ if [[ ! -f "$SOURCE_EXECUTABLE" ]]; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$ROM_SYMLINK")"
-ln -sfn "$ROOT_DIR/$ROM_DIR" "$ROM_SYMLINK"
-
 ensure_executable_file "$WIBO_PATH" "$WIBO_URL"
 ensure_extracted_tool "$EE_GCC_PATH" "$EE_GCC_URL"
 ensure_binutils
