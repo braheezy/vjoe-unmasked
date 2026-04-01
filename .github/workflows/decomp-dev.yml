@@ -14,9 +14,9 @@ permissions:
 
 jobs:
   report-sles-528-68:
-    name: SLES_528.68 report
+    name: vjoe2 report (SLES_528.68)
     runs-on: ubuntu-latest
-    container: ghcr.io/braheezy/vjoe-build:main
+    container: ghcr.io/braheezy/vjoe-build:latest
 
     steps:
       - name: Check out repository
@@ -24,7 +24,7 @@ jobs:
 
       - name: Git safe.directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        
+
       - name: Build matching binary
         run: |
           python3 tools/scripts/configure_build.py
