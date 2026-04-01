@@ -230,7 +230,7 @@ def postprocess_split_sources(config: ProjectConfig, config_dir: Path, build_dir
     if config.serial != "SLES_528.68":
         return
 
-    asm_dir = config_dir / "asm"
+    asm_dir = ROOT / "asm"
     data_dir = asm_dir / "data"
 
     text_00382200 = asm_dir / "text_00382200.s"
@@ -627,8 +627,8 @@ def c_object_path(path: Path, project_dir: Path, base_dir: Path) -> Path:
     return (base_dir / "src" / path.relative_to(project_dir / "src")).with_suffix(".c.o")
 
 
-def asm_object_path(path: Path, config_dir: Path, base_dir: Path) -> Path:
-    return (base_dir / "asm" / path.relative_to(config_dir / "asm")).with_suffix(".s.o")
+def asm_object_path(path: Path, asm_root: Path, base_dir: Path) -> Path:
+    return (base_dir / "asm" / path.relative_to(asm_root)).with_suffix(".s.o")
 
 
 def include_asm_object_path(source: Path, func: str, project_dir: Path, base_dir: Path) -> Path:
@@ -727,6 +727,7 @@ def write_build_ninja(
     arch, platform_name, os_name = platform_info()
     project_dir = ROOT / config.project
     config_dir = project_dir / "config" / config.serial
+    asm_root = ROOT / "asm"
     include_dir = project_dir / "include"
     src_dir = project_dir / "src"
     build_dir = ROOT / "build" / config.serial
@@ -888,7 +889,7 @@ def write_build_ninja(
     writer.rule(
         "clean_tree",
         command=(
-            f"rm -rf {q(rel(build_dir))} {q(rel(config_dir / 'asm'))} {q(rel(config_dir / 'assets'))} "
+            f"rm -rf {q(rel(build_dir))} {q(rel(asm_root))} {q(rel(config_dir / 'assets'))} "
             f"{q(rel(config_dir / 'linkers'))} && mkdir -p {q(rel(build_stamp_dir))} && touch $out"
         ),
         description="CLEAN",
@@ -1001,8 +1002,8 @@ def write_build_ninja(
     actual_asm_objects: list[str] = []
     expected_asm_objects: list[str] = []
     for source in asm_sources:
-        actual_output = rel(asm_object_path(source, config_dir, build_dir))
-        expected_output = rel(asm_object_path(source, config_dir, expected_dir))
+        actual_output = rel(asm_object_path(source, asm_root, build_dir))
+        expected_output = rel(asm_object_path(source, asm_root, expected_dir))
         writer.build(
             actual_output,
             "compile_asm",
@@ -1173,9 +1174,7 @@ def main() -> int:
         c_sources = scan_sources(project_dir / "src", ".c")
         c_units = [analyze_c_source(path, project_dir, build_dir) for path in c_sources]
         c_stems = {path.stem for path in c_sources}
-        asm_sources = [
-            path for path in scan_asm_sources(config_dir / "asm") if path.stem not in c_stems
-        ]
+        asm_sources = [path for path in scan_asm_sources(ROOT / "asm") if path.stem not in c_stems]
         write_build_ninja(config, c_units, asm_sources)
         return 0
     if mode != "configure":
@@ -1184,9 +1183,7 @@ def main() -> int:
     c_sources = scan_sources(project_dir / "src", ".c")
     c_units = [analyze_c_source(path, project_dir, build_dir) for path in c_sources]
     c_stems = {path.stem for path in c_sources}
-    asm_sources = [
-        path for path in scan_asm_sources(config_dir / "asm") if path.stem not in c_stems
-    ]
+    asm_sources = [path for path in scan_asm_sources(ROOT / "asm") if path.stem not in c_stems]
     write_build_ninja(config, c_units, asm_sources)
     return 0
 
