@@ -955,7 +955,7 @@ def write_build_ninja(
         expected_partial_inputs.append(expected_compile_output)
 
         for ref in unit.include_asm_refs:
-            asm_source = config_dir / ref.asm_dir / f"{ref.func}.s"
+            asm_source = ROOT / ref.asm_dir / f"{ref.func}.s"
             wrapper_source = write_include_asm_wrapper(
                 asm_source, source, ref.func, project_dir, build_dir
             )

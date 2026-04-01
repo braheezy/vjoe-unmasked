@@ -15,6 +15,7 @@ permissions:
 jobs:
   report-sles-528-68:
     name: vjoe2 report (SLES_528.68)
+    if: github.repository == 'braheezy/vjoe-unmasked'
     runs-on: ubuntu-latest
     container: ghcr.io/braheezy/vjoe-build:latest
 
