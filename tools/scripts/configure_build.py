@@ -485,6 +485,12 @@ def run_splat_generate(
 ) -> None:
     import splat.scripts.split as splat_split
 
+    config_path = config_path.resolve()
+    build_path = build_path.resolve()
+    yamls = [path.resolve() for path in yamls]
+    if objdiff_output_path is not None:
+        objdiff_output_path = objdiff_output_path.resolve()
+
     old_cwd = os.getcwd()
     try:
         get_relative_path = lambda path: Path(path).relative_to(config_path)
@@ -498,13 +504,25 @@ def run_splat_generate(
         )
         generate_linker_dependencies(config_path, build_path)
         if not no_objdiff and objdiff_output_path is not None:
-            generate_objdiff_units(build_path=build_path, output_path=objdiff_output_path)
+            generate_objdiff_units(
+                config_path=config_path,
+                build_path=build_path,
+                output_path=objdiff_output_path,
+            )
     finally:
         os.chdir(old_cwd)
 
 
-def generate_objdiff_units(*, build_path: Path, output_path: Path) -> None:
+def generate_objdiff_units(*, config_path: Path, build_path: Path, output_path: Path) -> None:
     import splat.scripts.split as splat_split
+
+    project_dir = config_path.parent.parent
+    expected_build_path = build_path / "expected"
+    build_path = build_path.resolve()
+    expected_build_path = expected_build_path.resolve()
+
+    def objdiff_rel(path: Path) -> str:
+        return path.resolve().relative_to(build_path).as_posix()
 
     units: list[dict] = []
     for entry in splat_split.linker_writer.entries:
@@ -534,8 +552,15 @@ def generate_objdiff_units(*, build_path: Path, output_path: Path) -> None:
             progress_categories=[parent.name == "engine" and "engine" or "stages"],
             source_path=source_path if is_code else None,
         )
-        base_path = normalize_object_path(Path(object_path), build_path) if is_code else None
-        target_path = normalize_object_path(to_expected_path(object_path), build_path)
+        if is_code:
+            source = project_dir / "src" / f"{segment.name}.c"
+            if not source.exists():
+                source = (config_path / source_path).resolve()
+            base_path = objdiff_rel(c_object_path(source, project_dir, build_path))
+            target_path = objdiff_rel(c_object_path(source, project_dir, expected_build_path))
+        else:
+            base_path = None
+            target_path = objdiff_rel(Path(normalize_object_path(to_expected_path(object_path), build_path)))
         units.append(
             {
                 "name": entry.segment.name,
@@ -714,7 +739,7 @@ def generator_inputs(config: ProjectConfig, config_dir: Path, project_dir: Path)
     for path in scan_sources(project_dir / "include", ".inc"):
         inputs.add(rel(path))
     for path in config_dir.iterdir():
-        if path.name == "rom":
+        if path.name in {"rom", "build"}:
             continue
         inputs.add(rel(path))
     return sorted(inputs)
@@ -883,7 +908,7 @@ def write_build_ninja(
     )
     writer.rule(
         "report",
-        command=f"{q(rel(objdiff_path))} report generate -o $out {q(rel(objdiff_config))}",
+        command=f"{q(rel(objdiff_path))} report generate -p {q(rel(build_dir))} -o $out",
         description="REPORT $out",
     )
     writer.rule(
@@ -1044,7 +1069,7 @@ def write_build_ninja(
             inputs=[rel(yaml_path)],
             implicit=split_inputs,
             order_only=[rel(python_stamp), rel(split_stamp)],
-            variables={"build_path": rel(expected_dir)},
+            variables={"build_path": rel(build_dir)},
         )
         fragment_outputs.append(fragment_path)
 
@@ -1131,6 +1156,9 @@ def main() -> int:
             elif arg == "--objdiff-output-path":
                 objdiff_output_path = Path(args[i + 1])
                 i += 2
+            elif arg.startswith("--objdiff-output-path="):
+                objdiff_output_path = Path(arg.split("=", 1)[1])
+                i += 1
             elif arg == "--make-full-disasm-for-code":
                 i += 1
             else:

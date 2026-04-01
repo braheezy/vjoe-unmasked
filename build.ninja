@@ -56,7 +56,7 @@ rule generate_objdiff
   description = OBJDIFF $out
 
 rule report
-  command = tools/objdiff-cli-macos-arm64 report generate -o $out build/SLES_528.68/objdiff.json
+  command = tools/objdiff-cli-macos-arm64 report generate -p build/SLES_528.68 -o $out
   description = REPORT $out
 
 rule diff
@@ -920,7 +920,7 @@ build build/SLES_528.68/expected/asm/text_00382200.s.o: compile_asm_expected asm
 build build/SLES_528.68/SLES_528.68: link build/SLES_528.68/src/early_state_rest.c.o build/SLES_528.68/asm/data/bss.bss.s.o build/SLES_528.68/asm/data/data.data.s.o build/SLES_528.68/asm/data/rodata.rodata.s.o build/SLES_528.68/asm/data/sbss.sbss.s.o build/SLES_528.68/asm/data/sdata.sdata.s.o build/SLES_528.68/asm/data/vudata.vudata.s.o build/SLES_528.68/asm/entry.s.o build/SLES_528.68/asm/text_00106810.s.o build/SLES_528.68/asm/text_0013FF98.s.o build/SLES_528.68/asm/text_00180030.s.o build/SLES_528.68/asm/text_001BFFE0.s.o build/SLES_528.68/asm/text_001FFFA8.s.o build/SLES_528.68/asm/text_0023FE88.s.o build/SLES_528.68/asm/text_0027FE80.s.o build/SLES_528.68/asm/text_002BF7A0.s.o build/SLES_528.68/asm/text_002FFF48.s.o build/SLES_528.68/asm/text_00382200.s.o | viewtiful-joe-2/config/SLES_528.68/linkers/SLES_528.68.ld || build/stamps/toolchain.stamp build/stamps/split.stamp
 
 build build/SLES_528.68/objdiff/SLES_528.68.json: generate_objdiff viewtiful-joe-2/config/SLES_528.68/SLES_528.68.yaml | viewtiful-joe-2/config/SLES_528.68/splat.config.yaml viewtiful-joe-2/config/SLES_528.68/SLES_528.68.yaml viewtiful-joe-2/config/SLES_528.68/symbol_addrs.txt viewtiful-joe-2/config/SLES_528.68/categories.json rom/SLES_528.68/SLES_528.68 || build/stamps/python.stamp build/stamps/split.stamp
-  build_path = build/SLES_528.68/expected
+  build_path = build/SLES_528.68
 
 build build/SLES_528.68/objdiff.json: merge_objdiff build/SLES_528.68/objdiff/SLES_528.68.json | tools/scripts/configure_build.py || build/stamps/python.stamp
 
