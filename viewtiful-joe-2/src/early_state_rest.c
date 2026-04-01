@@ -129,8 +129,7 @@ INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_001033D0);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103460);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103490);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_001035E8);
-void func_00103648(void) {
-}
+INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103648);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103650);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103790);
 INCLUDE_ASM("asm/nonmatchings/early_state_rest", func_00103810);
