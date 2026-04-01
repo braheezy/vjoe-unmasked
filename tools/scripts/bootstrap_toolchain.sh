@@ -39,13 +39,12 @@ ensure_executable_file() {
 ensure_extracted_tool() {
   local path="$1"
   local url="$2"
-  local output_dir
+  local output_dir="$3"
 
   if [[ -x "$path" ]]; then
     return
   fi
 
-  output_dir="$(dirname "$path")"
   extract_tarball "$url" "$output_dir"
   chmod +x "$path"
 }
@@ -68,7 +67,7 @@ if [[ ! -f "$SOURCE_EXECUTABLE" ]]; then
 fi
 
 ensure_executable_file "$WIBO_PATH" "$WIBO_URL"
-ensure_extracted_tool "$EE_GCC_PATH" "$EE_GCC_URL"
+ensure_extracted_tool "$EE_GCC_PATH" "$EE_GCC_URL" "$(dirname "$(dirname "$EE_GCC_PATH")")"
 ensure_binutils
 ensure_executable_file "$OBJDIFF_PATH" "$OBJDIFF_URL"
 
