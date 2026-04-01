@@ -1170,6 +1170,13 @@ def main() -> int:
     if mode == "split":
         uv_sync()
         split_outputs(config, config_dir, build_dir, include_dir)
+        c_sources = scan_sources(project_dir / "src", ".c")
+        c_units = [analyze_c_source(path, project_dir, build_dir) for path in c_sources]
+        c_stems = {path.stem for path in c_sources}
+        asm_sources = [
+            path for path in scan_asm_sources(config_dir / "asm") if path.stem not in c_stems
+        ]
+        write_build_ninja(config, c_units, asm_sources)
         return 0
     if mode != "configure":
         raise SystemExit(f"unknown mode: {mode}")
