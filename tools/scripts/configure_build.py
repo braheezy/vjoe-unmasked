@@ -161,20 +161,6 @@ def ensure_path_and_write(output_path: Path, contents: str) -> None:
     output_path.write_text(contents)
 
 
-def source_has_include_asm(path: Path) -> bool:
-    if not path.exists():
-        return False
-    return "INCLUDE_ASM(" in path.read_text()
-
-
-def unit_source_path(name: str) -> Path | None:
-    for root in (ROOT / "viewtiful-joe-2" / "src", ROOT / "viewtiful-joe" / "src"):
-        candidate = root / f"{name}.c"
-        if candidate.exists():
-            return candidate
-    return None
-
-
 def run(args: list[str], *, env: dict[str, str] | None = None) -> None:
     print("+", shlex.join(args))
     subprocess.run(args, cwd=ROOT, check=True, env=env)
@@ -567,13 +553,11 @@ def generate_objdiff_units(*, config_path: Path, build_path: Path, output_path: 
             source_path=source_path if is_code else None,
         )
         if is_code:
-            source = unit_source_path(segment.name)
-            if source is None:
+            source = project_dir / "src" / f"{segment.name}.c"
+            if not source.exists():
                 source = (config_path / source_path).resolve()
-            if source_has_include_asm(source):
-                continue
             base_path = objdiff_rel(c_object_path(source, project_dir, build_path))
-            target_path = objdiff_rel(c_object_path(source, project_dir, expected_build_path))
+            target_path = objdiff_rel(Path(normalize_object_path(to_expected_path(object_path), build_path)))
         else:
             base_path = None
             target_path = objdiff_rel(Path(normalize_object_path(to_expected_path(object_path), build_path)))
@@ -596,14 +580,6 @@ def merge_objdiff_units(*, categories_path: Path | None, output_path: Path, frag
     units = []
     for path in fragments:
         units.extend(json.loads(path.read_text()))
-
-    filtered_units = []
-    for unit in units:
-        source = unit_source_path(unit["name"])
-        if source is not None and source_has_include_asm(source):
-            continue
-        filtered_units.append(unit)
-    units = filtered_units
 
     units.sort(key=lambda unit: unit["name"])
 
